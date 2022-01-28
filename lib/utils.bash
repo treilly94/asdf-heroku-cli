@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for heroku-cli.
 GH_REPO="https://github.com/heroku/cli"
 TOOL_NAME="heroku-cli"
 TOOL_TEST="heroku --help"
@@ -31,8 +30,6 @@ list_github_tags() {
 }
 
 list_all_versions() {
-  # TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-  # Change this function if heroku-cli has other means of determining installable versions.
   list_github_tags
 }
 
@@ -41,8 +38,26 @@ download_release() {
   version="$1"
   filename="$2"
 
-  # TODO: Adapt the release URL convention for heroku-cli
-  url="$GH_REPO/archive/v${version}.tar.gz"
+  if [ "$(uname)" == "Darwin" ]; then
+    OS=darwin
+  elif [ "$(uname -s)" == "Linux" ]; then
+    OS=linux
+  else
+    echoerr "This installer is only supported on Linux and MacOS"
+    exit 1
+  fi
+
+  ARCH="$(uname -m)"
+  if [ "$ARCH" == "x86_64" ]; then
+    ARCH=x64
+  elif [[ "$ARCH" == aarch* ]]; then
+    ARCH=arm
+  else
+    echoerr "unsupported arch: $ARCH"
+    exit 1
+  fi
+
+  url="https://cli-assets.heroku.com/heroku-v${version}/heroku-v${version}-${OS}-${ARCH}.tar.gz"
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
