@@ -38,7 +38,26 @@ download_release() {
   version="$1"
   filename="$2"
 
-  url="https://cli-assets.heroku.com/heroku-v${version}/heroku-v${version}-linux-x64.tar.gz"
+  if [ "$(uname)" == "Darwin" ]; then
+    OS=darwin
+  elif [ "$(uname -s)" == "Linux" ]; then
+    OS=linux
+  else
+    echoerr "This installer is only supported on Linux and MacOS"
+    exit 1
+  fi
+
+  ARCH="$(uname -m)"
+  if [ "$ARCH" == "x86_64" ]; then
+    ARCH=x64
+  elif [[ "$ARCH" == aarch* ]]; then
+    ARCH=arm
+  else
+    echoerr "unsupported arch: $ARCH"
+    exit 1
+  fi
+
+  url="https://cli-assets.heroku.com/heroku-v${version}/heroku-v${version}-${OS}-${ARCH}.tar.gz"
 
   echo "* Downloading $TOOL_NAME release $version..."
   curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
