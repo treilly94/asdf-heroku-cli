@@ -43,17 +43,19 @@ download_release() {
   elif [ "$(uname -s)" == "Linux" ]; then
     OS=linux
   else
-    echoerr "This installer is only supported on Linux and MacOS"
+    fail "This installer is only supported on Linux and MacOS"
     exit 1
   fi
 
   ARCH="$(uname -m)"
-  if [ "$ARCH" == "x86_64" ]; then
+  if [ "$ARCH" == "x86_64" ] || [ "$OS" == "darwin" ]; then
     ARCH=x64
   elif [[ "$ARCH" == aarch* ]]; then
     ARCH=arm
+  elif [[ "$ARCH" == arm* ]]; then
+    ARCH=arm
   else
-    echoerr "unsupported arch: $ARCH"
+    fail "unsupported arch: $ARCH"
     exit 1
   fi
 
